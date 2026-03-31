@@ -32,7 +32,19 @@ npm install
 Copy-Item -Recurse . ~/.workbuddy/skills/workbuddy-manager
 ```
 
-安装后可通过自然语言调用（如"查看我的会话历史"、"清理缓存"）。
+安装完成后，直接用自然语言对话即可，无需记任何命令：
+
+| 你说的 | WorkBuddy 做的 |
+|--------|---------------|
+| "查看我的会话历史" | 调用 `sessions list`，列出所有会话 |
+| "搜索关于 HTML5 的会话" | 调用 `sessions search HTML5` |
+| "删除那个美女写真相关的会话" | 模糊匹配会话 → 预览 → 确认删除 |
+| "WorkBuddy 占了多少空间" | 调用 `resources overview`，展示各目录占用 |
+| "帮我清理一下缓存" | 展示将删除的内容 → 确认后执行 |
+| "查看我的自动化任务" | 调用 `automations list` |
+| "给 WorkBuddy 做个体检" | 依次执行四类检查，生成完整状态报告 |
+
+Skill 会自动识别意图、选择对应模块、执行命令，你只需要说人话。
 
 ### 方式二：独立使用
 
