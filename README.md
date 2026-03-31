@@ -24,7 +24,7 @@
 
 1. 打开 WorkBuddy 技能商店（点击侧边栏的「技能」图标）
 
-   <!-- 插入引导搜索的截图 -->
+   ![image-20260401010544339](https://gitee.com/starroom/typora-image/raw/master/images/20260401010544447.png)
 
 2. 搜索 `workbuddy-manager`，点击安装即可
 
