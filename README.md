@@ -18,19 +18,15 @@
 
 ## 🚀 安装
 
-### 方式一：作为 WorkBuddy Skill 安装
+### 方式一：技能商店一键安装（推荐）
 
-```powershell
-# 克隆仓库
-git clone https://github.com/starsss0416/workbuddy-manager.git
-cd workbuddy-manager
+在 WorkBuddy 中直接搜索安装，最快最省心：
 
-# 安装依赖（sql.js WASM）
-npm install
+1. 打开 WorkBuddy 技能商店（点击侧边栏的「技能」图标）
 
-# 复制到 Skill 目录
-Copy-Item -Recurse . ~/.workbuddy/skills/workbuddy-manager
-```
+   <!-- 插入引导搜索的截图 -->
+
+2. 搜索 `workbuddy-manager`，点击安装即可
 
 安装完成后，直接用自然语言对话即可，无需记任何命令：
 
@@ -46,7 +42,20 @@ Copy-Item -Recurse . ~/.workbuddy/skills/workbuddy-manager
 
 Skill 会自动识别意图、选择对应模块、执行命令，你只需要说人话。
 
-### 方式二：独立使用
+> ⚠️ 前置条件：确保本机已安装 **Node.js ≥ 18**。在终端运行 `node -v` 检查版本。未安装请前往 [nodejs.org](https://nodejs.org) 下载 LTS 版本。
+
+### 方式二：手动安装 Skill
+
+```powershell
+# 克隆仓库
+git clone https://github.com/starsss0416/workbuddy-manager.git
+cd workbuddy-manager
+
+# 复制到 Skill 目录（依赖已打包，无需 npm install）
+Copy-Item -Recurse . ~/.workbuddy/skills/workbuddy-manager
+```
+
+### 方式三：命令行独立使用
 
 ```powershell
 git clone https://github.com/starsss0416/workbuddy-manager.git

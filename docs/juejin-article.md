@@ -104,23 +104,19 @@ description: WorkBuddy会话越积越多，数据库膨胀，磁盘占用上升�
 
 ## 二、快速安装
 
-只需要 Node.js ≥ 18，三步搞定：
+> **前置条件**：确保本机已安装 Node.js ≥ 18。终端运行 `node -v` 检查，未安装请前往 [nodejs.org](https://nodejs.org) 下载 LTS 版本。
 
-```bash
-git clone https://github.com/starsss0416/workbuddy-manager.git
-cd workbuddy-manager
-npm install
-```
+### 技能商店一键安装（推荐）
 
-### 作为 WorkBuddy Skill 使用（推荐）
+最省心的方式——直接在 WorkBuddy 里搜索安装：
 
-将工具安装为 Skill 后，**不需要记任何命令**，直接用自然语言对话即可：
+1. 打开 WorkBuddy 技能商店（点击侧边栏的「技能」图标）
 
-```powershell
-Copy-Item -Recurse . ~/.workbuddy/skills/workbuddy-manager
-```
+   <!-- 在此插入引导搜索的截图 -->
 
-安装完成后，你可以直接这样跟 WorkBuddy 说：
+2. 搜索 `workbuddy-manager`，点击安装即可
+
+安装完成后，直接用自然语言对话即可，无需记任何命令：
 
 | 你说的                       | WorkBuddy 做的                            |
 | ---------------------------- | ----------------------------------------- |
@@ -133,6 +129,18 @@ Copy-Item -Recurse . ~/.workbuddy/skills/workbuddy-manager
 | "给 WorkBuddy 做个体检"      | 依次执行四类检查，生成完整状态报告        |
 
 > Skill 会自动识别意图、选择对应模块、执行命令，你只需要说人话。
+
+### 手动安装
+
+如果你更喜欢手动操作：
+
+```powershell
+git clone https://github.com/starsss0416/workbuddy-manager.git
+cd workbuddy-manager
+
+# 依赖已打包，无需 npm install，直接复制到 Skill 目录即可
+Copy-Item -Recurse . ~/.workbuddy/skills/workbuddy-manager
+```
 
 ### 命令行使用
 
