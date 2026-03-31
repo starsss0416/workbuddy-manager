@@ -20,6 +20,20 @@ description: WorkBuddy 任务/工作空间/会话管理工具。当用户需要�
 - WorkBuddy 运行状态检查（"状态"、"概览"、"健康检查"）
 - 模糊指令（"管理我的 WorkBuddy"、"查看任务列表"）
 
+## 前置依赖
+
+**Node.js ≥ 18**（必需）。首次使用前，执行以下命令确认环境：
+
+```bash
+node -v
+```
+
+- 若输出版本号 ≥ 18，环境正常，继续执行命令。
+- 若提示 `node: command not found` 或版本低于 18，告知用户：
+  > ⚠️ 本工具需要 Node.js ≥ 18。请前往 https://nodejs.org 下载安装 LTS 版本。
+
+**不需要 `npm install`**：`node_modules` 已随 Skill 一起打包，解压即用。
+
 ## 脚本位置
 
 所有脚本位于当前目录下的 `scripts/` 文件夹，使用 **ESM** 模块（`.mjs`），依赖 **sql.js**（WASM SQLite）读取 vscdb 数据库。

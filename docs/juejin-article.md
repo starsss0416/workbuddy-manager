@@ -1,16 +1,16 @@
 ---
 title: 我给 AI 编程助手写了一个「系统管家」——用 Node.js 逆向 vscdb 管理会话、清理缓存
-tags: [Node.js, AI编程助手, 工具开发, sql.js]
+tags: [WorkBuddy, Node.js, AI编程助手, 工具开发, sql.js]
 category: 前端
 date: 2026-04-01
-description: 当 AI 编程助手没有会话管理功能时，我选择自己动手。用 Node.js + sql.js 逆向 vscdb 数据库，200 行代码实现会话查看、搜索、删除、备份恢复、资源清理……
+description: WorkBuddy会话越积越多，数据库膨胀，磁盘占用上升，想清理某个旧会话？对不起，UI 里没有删除按钮。我选择自己动手做Skill，用 Node.js + sql.js 逆向 vscdb 数据库，200 行代码实现会话查看、搜索、删除、备份恢复、资源清理……
 ---
 
-# 我给 AI 编程助手写了一个「系统管家」——用 Node.js 逆向 vscdb 管理会话、清理缓存
+# 我给小龙虾写了一个「系统管家」——用 Node.js 逆向 vscdb 管理会话
 
 ## 前言
 
-我用 WorkBuddy（腾讯 AI 编程助手）快一个月了，日常开发基本离不开它。但有个痛点一直让我不爽：
+工欲善其事必先利其器。我用 WorkBuddy（腾讯小龙虾）快一个月了，日常开发基本离不开它。但有个痛点一直让我不爽：
 
 **没有会话管理。**
 
@@ -24,26 +24,26 @@ description: 当 AI 编程助手没有会话管理功能时，我选择自己动
 
 ### 🔍 会话管理
 
-| 命令 | 功能 |
-|------|------|
-| `list` | 列出所有会话，含状态、标题、工作空间、Brain 产物大小 |
-| `list --recent 10` | 最近 10 条 |
-| `search <keyword>` | 按标题/路径/ID 搜索 |
-| `delete <id> --force` | 删除 DB 记录 + Brain 产物 |
-| `delete <id> --force --db-only` | 仅删数据库记录 |
-| `delete <id> --force --brain-only` | 仅删 Brain 产物 |
-| `backup all` | 全量备份（元数据 + 产物） |
-| `restore <path>` | 恢复备份（不覆盖已存在文件） |
-| `migrate <src> <dst>` | 迁移产物（复制模式，不删源） |
+| 命令                               | 功能                                                 |
+| ---------------------------------- | ---------------------------------------------------- |
+| `list`                             | 列出所有会话，含状态、标题、工作空间、Brain 产物大小 |
+| `list --recent 10`                 | 最近 10 条                                           |
+| `search <keyword>`                 | 按标题/路径/ID 搜索                                  |
+| `delete <id> --force`              | 删除 DB 记录 + Brain 产物                            |
+| `delete <id> --force --db-only`    | 仅删数据库记录                                       |
+| `delete <id> --force --brain-only` | 仅删 Brain 产物                                      |
+| `backup all`                       | 全量备份（元数据 + 产物）                            |
+| `restore <path>`                   | 恢复备份（不覆盖已存在文件）                         |
+| `migrate <src> <dst>`              | 迁移产物（复制模式，不删源）                         |
 
 ### 💾 资源管理
 
-| 命令 | 功能 |
-|------|------|
-| `overview` | 查看各目录占用（cache/logs/crash/brain 等 8 个目录） |
-| `clean-cache` | 清理全部缓存 |
-| `clean-logs 30` | 清理 30 天前的日志 |
-| `clean-brain --keep-days 30` | 清理旧 Brain 产物 |
+| 命令                         | 功能                                                 |
+| ---------------------------- | ---------------------------------------------------- |
+| `overview`                   | 查看各目录占用（cache/logs/crash/brain 等 8 个目录） |
+| `clean-cache`                | 清理全部缓存                                         |
+| `clean-logs 30`              | 清理 30 天前的日志                                   |
+| `clean-brain --keep-days 30` | 清理旧 Brain 产物                                    |
 
 ### ⏱️ 自动化任务 & 📂 工作空间
 
@@ -122,15 +122,15 @@ Copy-Item -Recurse . ~/.workbuddy/skills/workbuddy-manager
 
 安装完成后，你可以直接这样跟 WorkBuddy 说：
 
-| 你说的 | WorkBuddy 做的 |
-|--------|---------------|
-| "查看我的会话历史" | 调用 `sessions list`，列出所有会话 |
-| "搜索关于 HTML5 的会话" | 调用 `sessions search HTML5` |
-| "删除那个美女写真相关的会话" | 模糊匹配会话 → 预览 → 确认删除 |
-| "WorkBuddy 占了多少空间" | 调用 `resources overview`，展示各目录占用 |
-| "帮我清理一下缓存" | 展示将删除的内容 → 确认后执行 |
-| "查看我的自动化任务" | 调用 `automations list` |
-| "给 WorkBuddy 做个体检" | 依次执行四类检查，生成完整状态报告 |
+| 你说的                       | WorkBuddy 做的                            |
+| ---------------------------- | ----------------------------------------- |
+| "查看我的会话历史"           | 调用 `sessions list`，列出所有会话        |
+| "搜索关于 HTML5 的会话"      | 调用 `sessions search HTML5`              |
+| "删除那个美女写真相关的会话" | 模糊匹配会话 → 预览 → 确认删除            |
+| "WorkBuddy 占了多少空间"     | 调用 `resources overview`，展示各目录占用 |
+| "帮我清理一下缓存"           | 展示将删除的内容 → 确认后执行             |
+| "查看我的自动化任务"         | 调用 `automations list`                   |
+| "给 WorkBuddy 做个体检"      | 依次执行四类检查，生成完整状态报告        |
 
 > Skill 会自动识别意图、选择对应模块、执行命令，你只需要说人话。
 
@@ -173,10 +173,10 @@ WorkBuddy 的会话数据存在一个 `.vscdb` 文件里。如果你用过 VS Co
 
 用任意 SQLite 工具打开它，结构很简单：
 
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| `key` | TEXT | 会话 ID，格式 `session:<uuid>` |
-| `value` | BLOB | 会话数据，JSON 序列化 |
+| 字段    | 类型 | 说明                           |
+| ------- | ---- | ------------------------------ |
+| `key`   | TEXT | 会话 ID，格式 `session:<uuid>` |
+| `value` | BLOB | 会话数据，JSON 序列化          |
 
 一条 `value` 解析后大概长这样：
 
@@ -210,10 +210,10 @@ WorkBuddy 的会话数据存在一个 `.vscdb` 文件里。如果你用过 VS Co
 
 **方案对比：**
 
-| 方案 | 优点 | 缺点 |
-|------|------|------|
-| Python + sqlite3 | 标准库自带 | 需要额外装 Python 环境 |
-| Go + go-sqlite3 | 单文件编译 | 编译配置麻烦 |
+| 方案                 | 优点                   | 缺点                   |
+| -------------------- | ---------------------- | ---------------------- |
+| Python + sqlite3     | 标准库自带             | 需要额外装 Python 环境 |
+| Go + go-sqlite3      | 单文件编译             | 编译配置麻烦           |
 | **Node.js + sql.js** | 纯 JS/WASM，零原生依赖 | WASM 体积略大（~18MB） |
 
 考虑到 WorkBuddy 自身就是基于 Electron（Node.js）的，选 Node.js 是最自然的选择。**sql.js** 是 SQLite 编译成 WebAssembly 的版本，`npm install` 一键搞定，不需要编译任何原生模块。
