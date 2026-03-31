@@ -4,11 +4,11 @@
 
 ## ✨ 特性
 
-- 🔍 **会话管理** — 列出、搜索、删除会话记录（直接操作 vscdb 数据库）
+- 🔍 **会话管理** — 列出、搜索、删除会话记录（直接操作 vscdb 数据库 + Brain 产物）
 - 📂 **工作空间管理** — 查看工作空间列表、详情和 memory 使用情况
-- ⏱️ **自动化任务** — 查看定时任务的配置和状态
-- 💾 **资源监控** — 查看各目录占用、清理缓存/日志/崩溃报告
-- 📦 **备份恢复** — 备份和恢复会话数据
+- ⏱️ **自动化任务** — 查看定时任务的配置和执行规则
+- 💾 **资源监控** — 查看各目录占用、清理缓存/日志/崩溃报告/Brain 产物
+- 📦 **备份恢复** — 备份和恢复会话元数据与 Brain 产物
 - ⚡ **快速** — 所有命令 150ms 内完成
 
 ## 📋 环境要求
@@ -20,22 +20,27 @@
 
 ### 方式一：作为 WorkBuddy Skill 安装
 
-将整个目录复制到 WorkBuddy 的 skills 目录：
-
 ```powershell
-Copy-Item -Recurse ./workbuddy-manager ~/.workbuddy/skills/workbuddy-manager
-cd ~/.workbuddy/skills/workbuddy-manager
+# 克隆仓库
+git clone https://github.com/starsss0416/workbuddy-manager.git
+cd workbuddy-manager
+
+# 安装依赖（sql.js WASM）
 npm install
+
+# 复制到 Skill 目录
+Copy-Item -Recurse . ~/.workbuddy/skills/workbuddy-manager
 ```
 
-安装后可通过自然语言调用（如"查看我的会话历史"）。
+安装后可通过自然语言调用（如"查看我的会话历史"、"清理缓存"）。
 
 ### 方式二：独立使用
 
 ```powershell
-git clone <repo-url>
+git clone https://github.com/starsss0416/workbuddy-manager.git
 cd workbuddy-manager
 npm install
+node scripts/sessions.mjs list  # 直接使用
 ```
 
 ## 📁 目录结构
@@ -43,7 +48,7 @@ npm install
 ```
 workbuddy-manager/
 ├── scripts/
-│   ├── _utils.mjs          # 共享工具函数（路径、格式化、SQLite 操作）
+│   ├── _utils.mjs          # 共享工具函数（路径常量、格式化、SQLite 操作、Brain 扫描）
 │   ├── sessions.mjs        # 会话管理
 │   ├── workspaces.mjs      # 工作空间管理
 │   ├── automations.mjs     # 自动化任务管理
@@ -51,15 +56,16 @@ workbuddy-manager/
 ├── references/
 │   ├── paths.md            # WorkBuddy 路径参考文档
 │   └── status-report.md    # 状态报告格式参考
-├── SKILL.md                # Skill 定义文件（触发条件、工作流）
+├── SKILL.md                # Skill 定义文件（AI 触发条件与工作流）
 ├── README.md               # 本文档
+├── .gitignore
 ├── package.json
 └── package-lock.json
 ```
 
 源码仅 **~42 KB**，`node_modules`（sql.js WASM）约 **18 MB**。
 
-## 🛠️ 使用方式
+## 🛠️ 命令参考
 
 ### 会话管理
 
@@ -67,79 +73,54 @@ workbuddy-manager/
 # 列出所有会话
 node scripts/sessions.mjs list
 
-# 仅查看最近 5 条
+# 仅查看最近 N 条
 node scripts/sessions.mjs list --recent 5
 
-# 按关键词搜索
+# 按关键词搜索（匹配标题、工作空间路径、会话 ID）
 node scripts/sessions.mjs search HTML5
 
-# 预览删除（不实际删除，仅显示将要删除的内容）
-node scripts/sessions.mjs delete <session-id>
+# 删除会话（支持细粒度控制）
+node scripts/sessions.mjs delete <session-id>              # 预览，不实际删除
+node scripts/sessions.mjs delete <session-id> --force      # 同时删除 DB 记录 + Brain 产物
+node scripts/sessions.mjs delete <session-id> --force --db-only    # 仅删数据库记录
+node scripts/sessions.mjs delete <session-id> --force --brain-only # 仅删 Brain 产物
 
-# 删除会话记录 + Brain 产物
-node scripts/sessions.mjs delete <session-id> --force
+# 备份
+node scripts/sessions.mjs backup <session-id>             # 备份单个会话
+node scripts/sessions.mjs backup all                       # 备份全部会话
+node scripts/sessions.mjs backup all --output ./my-backup  # 备份到指定目录
 
-# 仅删除数据库记录（保留 Brain 产物）
-node scripts/sessions.mjs delete <session-id> --force --db-only
-
-# 仅删除 Brain 产物（保留数据库记录）
-node scripts/sessions.mjs delete <session-id> --force --brain-only
-
-# 备份所有会话
-node scripts/sessions.mjs backup all
-
-# 备份单个会话到指定目录
-node scripts/sessions.mjs backup <session-id> --output ./my-backup
-
-# 从备份恢复
+# 恢复（不覆盖已存在的文件）
 node scripts/sessions.mjs restore <backup-path>
 
-# 迁移 Brain 产物到新目录
+# 迁移 Brain 产物（复制模式，不删源）
 node scripts/sessions.mjs migrate <source-dir> <target-dir>
 ```
 
-**会话 ID 支持缩写**：只需输入前几位即可匹配（如 `ffec10aa` 可匹配完整 UUID）。
+> **会话 ID 支持缩写**：只需输入前几位即可匹配完整 UUID（如 `ffec10aa` 即可）。
 
 ### 工作空间管理
 
 ```bash
-# 列出所有工作空间
-node scripts/workspaces.mjs list
-
-# 查看工作空间详情（大小、memory、技能等）
-node scripts/workspaces.mjs info <workspace-path>
-
-# 查看 memory 目录内容
-node scripts/workspaces.mjs memory <workspace-path>
+node scripts/workspaces.mjs list                     # 列出所有工作空间
+node scripts/workspaces.mjs info <workspace-path>    # 查看详情
+node scripts/workspaces.mjs memory <workspace-path>  # 查看 memory 内容
 ```
 
 ### 自动化任务
 
 ```bash
-# 列出所有自动化任务
-node scripts/automations.mjs list
-
-# 查看某个任务的详细配置
-node scripts/automations.mjs info <automation-id>
+node scripts/automations.mjs list            # 列出所有任务
+node scripts/automations.mjs info <task-id>  # 查看任务完整配置
 ```
 
 ### 系统资源
 
 ```bash
-# 查看资源占用概览
-node scripts/resources.mjs overview
-
-# 清理缓存
-node scripts/resources.mjs clean-cache
-
-# 清理旧日志（默认保留 7 天）
-node scripts/resources.mjs clean-logs
-
-# 清理指定天数前的日志
-node scripts/resources.mjs clean-logs 30
-
-# 清理旧 Brain 产物（默认保留 30 天）
-node scripts/resources.mjs clean-brain --keep-days 30
+node scripts/resources.mjs overview                  # 查看资源占用
+node scripts/resources.mjs clean-cache               # 清理全部缓存
+node scripts/resources.mjs clean-logs [days]         # 清理旧日志（默认 7 天）
+node scripts/resources.mjs clean-brain --keep-days 30  # 清理旧 Brain 产物（默认 30 天）
 ```
 
 ## 📊 输出示例
@@ -166,7 +147,7 @@ node scripts/resources.mjs clean-brain --keep-days 30
 ```
 💾 WorkBuddy 资源占用概览
 
-  目录          大小         文件数
+  目录                          大小         文件数
   ─────────────────────────────────────
   cache         40.7 MB      122
   logs          59.3 MB      449
@@ -176,17 +157,34 @@ node scripts/resources.mjs clean-brain --keep-days 30
   总计           248.0 MB     593
 ```
 
+### sessions delete (预览模式)
+
+```
+🗑️  准备删除
+  ID: 9595df9d8bfc4a709dcd8a09d576146a
+  标题: 帮我生成一张小红书风格的美女写真
+  状态: Completed
+
+⚠️  预览模式，未实际删除。
+  📄 会话记录: 1 条
+  🧠 Brain 产物: 3.2 MB
+
+  加 --force 确认删除，加 --db-only 仅删除数据库记录，加 --brain-only 仅删除产物
+```
+
 ## 🔧 技术实现
 
 ### 数据库
 
 WorkBuddy 的会话存储在 **vscdb** 格式的 SQLite 数据库中：
 
-- **路径**: `%APPDATA%/WorkBuddy/codebuddy-sessions.vscdb`
-- **表名**: `ItemTable`
-- **结构**: `key TEXT, value BLOB`
-- **Key 格式**: `session:<uuid>`
-- **Value**: JSON 字符串（可能以 BLOB 存储，需 `TextDecoder` 转换）
+| 项目 | 说明 |
+|------|------|
+| 路径 | `%APPDATA%/WorkBuddy/codebuddy-sessions.vscdb` |
+| 表名 | `ItemTable` |
+| 结构 | `key TEXT, value BLOB` |
+| Key 格式 | `session:<uuid>` |
+| Value | JSON 字符串（可能以 BLOB 存储，需 `TextDecoder` 转换） |
 
 使用 [sql.js](https://github.com/sql-js/sql.js)（WASM 版 SQLite）读写数据库，无需安装原生依赖。
 
@@ -197,16 +195,19 @@ WorkBuddy 的会话存储在 **vscdb** 格式的 SQLite 数据库中：
 | WorkBuddy 根目录 | `%APPDATA%/WorkBuddy/` |
 | 会话数据库 | `%APPDATA%/WorkBuddy/codebuddy-sessions.vscdb` |
 | Brain 产物 | `%APPDATA%/WorkBuddy/User/globalStorage/tencent-cloud.coding-copilot/brain/` |
-| 自动化任务 DB | `%APPDATA%/WorkBuddy/automations/automations.db` |
+| 自动化任务 | `~/.workbuddy/automations/<id>/automation.toml` |
 | 备份默认目录 | `%APPDATA%/WorkBuddy/Backups/sessions/` |
+| 工作空间存储 | `%APPDATA%/WorkBuddy/User/workspaceStorage/` |
 
 ## ⚠️ 安全设计
 
-- **只读优先** — 所有查询操作不修改任何数据
-- **删除需确认** — `delete` 不加 `--force` 仅预览，不实际执行
-- **先备份再删除** — 建议删除前先 `backup`
-- **恢复不覆盖** — `restore` 遇到已存在的目标会跳过
-- **迁移不删源** — `migrate` 采用复制模式
+| 原则 | 说明 |
+|------|------|
+| **只读优先** | 所有查询操作不修改任何数据 |
+| **删除需确认** | `delete` 不加 `--force` 仅预览 |
+| **先备份再删除** | 建议删除前先 `backup` |
+| **恢复不覆盖** | `restore` 遇到已存在的目标会跳过 |
+| **迁移不删源** | `migrate` 采用复制模式 |
 
 ## 📦 迁移到其他机器
 
@@ -217,7 +218,7 @@ cd workbuddy-manager
 npm install
 
 # 3. 安装为 Skill
-Copy-Item -Recurse ./ ~/.workbuddy/skills/workbuddy-manager
+Copy-Item -Recurse . ~/.workbuddy/skills/workbuddy-manager
 ```
 
 > 路径通过 `%APPDATA%` 动态获取，无需修改代码。`npm install` 会自动下载对应平台的 WASM 文件。
